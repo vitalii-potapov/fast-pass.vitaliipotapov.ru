@@ -12,7 +12,21 @@ function changeCharASCII(&$item, $key, $add = null) {
   $item = ord($item);
   $item += $add;
 }
-
+function hideLogin($login) {
+  if($login) {
+    $login_start = strstr($login, '@', true) ? strstr($login, '@', true) : $login;
+    $login_end = strstr($login, '@');
+    $login = substr_replace($login_start, '*****', 3, -2) . $login_end;
+    return $login;
+  }
+}
+$icons = [
+  'github.com' => 'https://github.githubassets.com/favicon.ico',
+  'auth.jino.ru' => 'https://www.jino.ru/static/icons/red/apple-touch-icon-76x76.png',
+  'omsk.hh.ru' => 'https://i.hh.ru/apple/hh/touch-icon-ipad.png',
+  'moikrug.ru' => 'https://moikrug.ru/favicon.ico',
+  'vk.com' => 'https://vk.com/images/safari_76.png?1',
+]
 ?>
 
 <div class="site-index">
@@ -65,8 +79,8 @@ function changeCharASCII(&$item, $key, $add = null) {
               ?>
               <tr>
                 <th scope="row"><?=$key?></th>
-                <td><?=$site?></td>
-                <td><?=$login?></td>
+                <td><img src="<?=$icons[$site]?>" alt=""><?=$site?></td>
+                <td><?=hideLogin($login)?></td>
                 <td style="
                     display: flex;
                     justify-content: space-around;

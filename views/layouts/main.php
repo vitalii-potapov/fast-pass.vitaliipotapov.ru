@@ -25,6 +25,11 @@ AppAsset::register($this);
         .table td, .table th {
             vertical-align: middle !important;
         }
+        td img {
+            width: 22px;
+            margin-right: 10px;
+            border-radius: 50%;
+        }
     </style>
     <?php $this->head() ?>
 </head>
@@ -46,7 +51,6 @@ AppAsset::register($this);
         $menuItems = [
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'Services', 'url' => ['/site/services']],
-            ['label' => 'About', 'url' => ['/site/about']],
         ];
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')

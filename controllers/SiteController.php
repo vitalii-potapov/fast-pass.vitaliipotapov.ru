@@ -27,7 +27,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index', 'about', 'services', 'remove', 'update'],
+                        'actions' => ['logout', 'index', 'services', 'remove', 'update'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -177,16 +177,6 @@ class SiteController extends Controller
         if ($model->update()) {
             return $this->goHome();
         }
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
     }
 
 }
