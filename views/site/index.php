@@ -32,7 +32,7 @@ $icons = [
 <div class="site-index">
   <div class="row">
     <div class="aside-content col-xs-2">
-      <a href="javascript:(function(){let key=prompt('Ключ?',''),arrKey=key.split(''),summKey=0,arrlog=[],arrpass=[];for(let i=0;i<arrKey.length;i++){summKey+=arrKey[i].charCodeAt()} let s=window.location.search,login=s.substring(5,s.indexOf('&pass')).slice(1).split(','),pass=s.substring(s.indexOf('&pass'),s.indexOf('&attr')).slice(6).split(',');for(let i=0;i<login.length;i++){arrlog.push(String.fromCharCode(login[i]-summKey))} for(let i=0;i<pass.length;i++){arrpass.push(String.fromCharCode(pass[i]-summKey))} let attr=s.substring(s.indexOf('&attr')).slice(6).split(','),field_login=attr[1],field_pass=attr[2];if(attr[0]==0){document.querySelector(`[name='${field_login}']`).value=arrlog.join('');document.querySelector(`[name='${field_pass}']`).value=arrpass.join('');document.querySelector(`[name='${field_pass}']`).form.submit()}else{document.querySelector('#'+field_login).value=arrlog.join('');document.querySelector(''+field_pass).value=arrpass.join('');document.querySelector(''+field_pass).form.submit()}}())">
+      <a href="javascript:(function(){let key=prompt('Ключ?',''),arrKey=key.split(''),summKey=0,arrlog=[],arrpass=[];for(let i=0;i<arrKey.length;i++){summKey+=arrKey[i].charCodeAt()} let s=window.location.search,login=s.substring(5,s.indexOf('&pass')).slice(1).split(','),pass=s.substring(s.indexOf('&pass'),s.indexOf('&attr')).slice(6).split(',');for(let i=0;i<login.length;i++){arrlog.push(String.fromCharCode(login[i]-summKey))} for(let i=0;i<pass.length;i++){arrpass.push(String.fromCharCode(pass[i]-summKey))} let attr=s.substring(s.indexOf('&attr')).slice(6).split(','),field_login=attr[1],field_pass=attr[2];if(attr[0]==0){document.querySelector(`[name='${field_login}']`).value=arrlog.join('');document.querySelector(`[name='${field_pass}']`).value=arrpass.join('');document.querySelector(`[name='${field_pass}']`).form.submit()}else{document.querySelector('#'+field_login).value=arrlog.join('');document.querySelector('#'+field_pass).value=arrpass.join('');document.querySelector('#'+field_pass).form.submit()}}())">
         Fast-pass
       </a>
       <br>
@@ -79,8 +79,8 @@ $icons = [
               ?>
               <tr>
                 <th scope="row"><?=$key?></th>
-                <td><img src="<?=$icons[$site]?>" alt=""><?=$site?></td>
-                <td><?=hideLogin($login)?></td>
+                <td class="field-site"><img src="<?=$icons[$site]?>" alt=""><?=$site?></td>
+                <td class="field-login"><?=hideLogin($login)?></td>
                 <td style="
                     display: flex;
                     justify-content: space-around;
@@ -91,8 +91,18 @@ $icons = [
                     href="<?=$auth?>?name=<?=$l_login?>&pass=<?=$l_pass?>&attr=<?=$s->attribute?>,<?=$s->field_login?>,<?=$s->field_pass?>"
                     target="_blank">L
                   </a>
-                  <a data-id=<?=$s->id?> class="btn btn-danger">R</a>
-                  <a data-id=<?=$s->id?> class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a>
+                  <a data-id="<?=$s->id?>" class="btn btn-danger">R</a>
+                  <a
+                    data-id="<?=$s->id?>"
+                    data-site="<?=$auth?>"
+                    data-login="<?=$login?>"
+                    data-flogin="<?=$s->field_login?>"
+                    data-fpass="<?=$s->field_pass?>"
+                    data-attr="<?=$s->attribute?>"
+                    class="btn btn-primary btn-update"
+                    data-toggle="modal"
+                    data-target="#myModal">U
+                  </a>
                 </td>
               </tr>
             <?php endforeach ?>
@@ -165,7 +175,13 @@ $js = <<<JS
   });
 
   $('.btn-update').on('click', function(){
+    $('#myModalLabel').text($(this).closest('tr').children('.field-site').text())
     $('#service-update').attr('action', 'site/update?id='+$(this).attr('data-id'));
+    $('#services-site').val($(this).attr('data-site'));
+    $('#services-login').val($(this).attr('data-login'));
+    $('#services-field_login').val($(this).attr('data-flogin'));
+    $('#services-field_pass').val($(this).attr('data-fpass'));
+    $('#services-attribute [value="' + $(this).attr('data-attr') + '"]').attr('checked', 'checked');
   });
 
 

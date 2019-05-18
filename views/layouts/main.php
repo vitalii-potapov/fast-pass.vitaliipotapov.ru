@@ -30,6 +30,13 @@ AppAsset::register($this);
             margin-right: 10px;
             border-radius: 50%;
         }
+        #service-form .radio,
+        #service-update .radio {
+            display: inline-block ;
+        }
+        .radio:not(:first-child) {
+            margin-left: 10px;
+        }
     </style>
     <?php $this->head() ?>
 </head>
