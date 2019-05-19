@@ -26,7 +26,7 @@ $icons = [
   'omsk.hh.ru' => 'https://i.hh.ru/apple/hh/touch-icon-ipad.png',
   'moikrug.ru' => 'https://moikrug.ru/favicon.ico',
   'vk.com' => 'https://vk.com/images/safari_76.png?1',
-]
+];
 ?>
 
 <div class="site-index">

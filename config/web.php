@@ -6,7 +6,7 @@ $db = require __DIR__ . '/db.php';
 $config = [
     'id' => 'basic',
     'basePath' => dirname(__DIR__),
-    'bootstrap' => ['log'],
+    'bootstrap' => ['log', 'headers'],
     'aliases' => [
         '@bower' => '@vendor/bower-asset',
         '@npm'   => '@vendor/npm-asset',
@@ -50,6 +50,28 @@ $config = [
                 '' => 'site/index',
                 '<controller:\w+>/<action:\w+>/' => '<controller>/<action>',
             ],
+        ],
+        'headers' => [
+            'class' => '\hyperia\security\Headers',
+            'upgradeInsecureRequests' => true,
+            'blockAllMixedContent' => true,
+            'stsMaxAge' => 10,
+            'xFrameOptions' => 'DENY',
+            'xPoweredBy' => 'Hyperia',
+            'publicKeyPins' => '',
+            'reportUri' => 'https://company.report-uri.io',
+            'cspDirectives' => [
+                'script-src' => "'self' 'unsafe-inline'",
+                'style-src' => "'self' 'unsafe-inline'",
+                'img-src' => "'self' data:",
+                'connect-src' => "'self'",
+                'font-src' => "'self'",
+                'object-src' => "'self'",
+                'media-src' => "'self'",
+                'form-action' => "'self'",
+                'frame-src' => "'self'",
+                'child-src' => "'self'"
+            ]
         ],
     ],
     'params' => $params,
