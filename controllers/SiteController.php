@@ -150,7 +150,12 @@ class SiteController extends Controller
     {
         if(\Yii::$app->request->isAjax){
             $model = new Services();
-            $model->findOne($id)->delete();
+            $model = $model->findOne(['id' => $id, 'user_id' => Yii::$app->user->identity->id]);
+            if ($model !== NULL && $model->delete()) {
+                return 1;
+            } else {
+                return 0;
+            }
         }
     }
 
