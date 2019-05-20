@@ -6,15 +6,42 @@ use yii\helpers\Html;
 use app\models\Services;
 use yii\bootstrap\ActiveForm;
 
-$this->title = 'My Yii Application';
+$this->title = Yii::$app->name;
+
 ?>
 
 <?php if (Yii::$app->params['REST_API_MOD']) : ?>
+  <?php $this->registerJsFile('js/requests.js',  ['depends' => [\yii\web\JqueryAsset::className()]]); ?>
 
-  <h1>rest api mod</h1>
+  <div id="secret-form" class="text-center" style="display:none">
+    <form class="form-inline">
+      <div class="form-group">
+        <input id="secret-key" name="secret-key" type="password" class="form-control" placeholder="Please enter your secret key">
+      </div>
+      <button id="get-sites" type="submit" class="btn btn-default">Send key</button>
+    </form>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-striped">
+      <thead id="thead">
+        <tr>
+          <th class="column-1" scope="col">#</th>
+          <th class="column-2" scope="col">site</th>
+          <th class="column-3" scope="col">login</th>
+          <th class="column-4" scope="col"><span>L</span>ink / Remove / Update</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+
+      </tbody>
+    </table>
+    <p class="empty-list" style="display:none;">Your list is empty, you must create a record or enter your secret key</p>
+  </div>
 
 <?php else : ?>
 
+  <?php $this->registerJsFile('js/main.js',  ['depends' => [\yii\web\JqueryAsset::className()]]); ?>
   <?php
   function changeCharASCII(&$item, $key, $add = null) {
     $item = ord($item);
@@ -30,11 +57,12 @@ $this->title = 'My Yii Application';
   }
 
   $icons = [
-    'github.com' => 'image/icons/github.ico',
-    'auth.jino.ru' => 'image/icons/jino.png',
-    'omsk.hh.ru' => 'image/icons/hh.png',
-    'moikrug.ru' => 'image/icons/moikrug.ico',
-    'vk.com' => 'image/icons/vk.png',
+    'empty' => '/web/image/icons/empty.png',
+    'github.com' => '/web/image/icons/github.ico',
+    'auth.jino.ru' => '/web/image/icons/jino.png',
+    'omsk.hh.ru' => '/web/image/icons/hh.png',
+    'moikrug.ru' => '/web/image/icons/moikrug.ico',
+    'vk.com' => '/web/image/icons/vk.png',
   ];
   ?>
 
@@ -103,106 +131,105 @@ $this->title = 'My Yii Application';
           <input class="form-control" id="secretKey" name="secretKey" type="password" onchange="this.form.submit()" placeholder="Please enter your secret key">
         </form>
 
-        <table class="table">
-          <thead>
-            <tr>
-              <th width='30px' scope="col">#</th>
-              <th scope="col">site</th>
-              <th scope="col">login</th>
-              <th width='1px' scope="col" style="text-align: center;white-space: nowrap;"><span>L</span>ink / Remove / Update</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php if(isset($data)) : ?>
-              <?php foreach($data as $key => $s) :
-                $key += 1;
-                $secKey = 'A' . $userKey . strtotime(date($s->date_create));
-                $login = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->login), $secKey);
-                $pass = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->pass), $secKey);
-                $auth = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->site), $secKey);
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead id="thead">
+              <tr>
+                <th class="column-1" scope="col">#</th>
+                <th class="column-2" scope="col">site</th>
+                <th class="column-3" scope="col">login</th>
+                <th class="column-4" scope="col"><span>L</span>ink / Remove / Update</th>
+              </tr>
+            </thead>
+            <tbody id="tbody">
+              <?php if(isset($data)) : ?>
+                <?php foreach($data as $key => $s) :
+                  $key += 1;
+                  $secKey = 'A' . $userKey . strtotime(date($s->date_create));
+                  $login = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->login), $secKey);
+                  $pass = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->pass), $secKey);
+                  $auth = Yii::$app->getSecurity()->decryptByPassword(base64_decode($s->site), $secKey);
 
-                $site = parse_url($auth, PHP_URL_HOST);
-                $l_userKey = str_split($userKey);
+                  $site = $auth ? parse_url($auth, PHP_URL_HOST) : 'unknown';
+                  $ic = $auth ? $site : 'empty';
 
-                array_walk($l_userKey, 'changeCharASCII');
-                $l_userKey = array_sum($l_userKey);
+                  $l_userKey = str_split($userKey);
+                  array_walk($l_userKey, 'changeCharASCII');
+                  $l_userKey = array_sum($l_userKey);
 
-                $l_login = str_split($login);
-                array_walk($l_login, 'changeCharASCII', $l_userKey);
-                $l_login = implode(',', $l_login);
+                  $l_login = str_split($login);
+                  array_walk($l_login, 'changeCharASCII', $l_userKey);
+                  $l_login = implode(',', $l_login);
 
-                $l_pass = str_split($pass);
-                array_walk($l_pass, 'changeCharASCII', $l_userKey);
-                $l_pass = implode(',', $l_pass);
+                  $l_pass = str_split($pass);
+                  array_walk($l_pass, 'changeCharASCII', $l_userKey);
+                  $l_pass = implode(',', $l_pass);
                 ?>
-                <tr>
-                  <th scope="row"><?=$key?></th>
-                  <td class="field-site"><img src="<?=$icons[$site]?>" alt=""><?=$site?></td>
-                  <td class="field-login"><?=hideLogin($login)?></td>
-                  <td style="
-                      display: flex;
-                      justify-content: space-around;
-                      <?=$key === 1 ? 'margin-top: -1px;' : null ?>
-                    ">
-                    <a
-                      class="btn btn-success"
-                      href="<?=$auth?>?name=<?=$l_login?>&pass=<?=$l_pass?>&attr=<?=$s->attribute?>,<?=$s->field_login?>,<?=$s->field_pass?>"
-                      target="_blank">L
-                    </a>
-                    <a data-id="<?=$s->id?>" class="btn btn-danger">R</a>
-                    <a
-                      data-id="<?=$s->id?>"
-                      data-site="<?=$auth?>"
-                      data-login="<?=$login?>"
-                      data-flogin="<?=$s->field_login?>"
-                      data-fpass="<?=$s->field_pass?>"
-                      data-attr="<?=$s->attribute?>"
-                      class="btn btn-primary btn-update"
-                      data-toggle="modal"
-                      data-target="#myModal">U
-                    </a>
-                  </td>
-                </tr>
-              <?php endforeach ?>
-            <?php endif?>
-          </tbody>
-        </table>
-
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" id="myModalLabel">Название модали</h4>
+                  <tr>
+                    <th scope="row"><?= $key ?></th>
+                    <td class="field-site"><img src="<?= $icons[$ic] ?>" alt=""><?= $site ?></td>
+                    <td class="field-login"><?= hideLogin($login) ?></td>
+                    <td>
+                      <a
+                        class="btn btn-success"
+                        href="<?= $auth ?>?name=<?= $l_login ?>&pass=<?= $l_pass ?>&attr=<?= $s->attribute ?>,<?= $s->field_login ?>,<?= $s->field_pass ?>"
+                        target="_blank">L
+                      </a>
+                      <a data-id="<?= $s->id ?>" class="btn btn-danger">R</a>
+                      <a
+                        data-id="<?= $s->id ?>"
+                        data-site="<?= $auth ?>"
+                        data-login="<?= $login ?>"
+                        data-flogin="<?= $s->field_login ?>"
+                        data-fpass="<?= $s->field_pass ?>"
+                        data-attr="<?= $s->attribute ?>"
+                        class="btn btn-primary btn-update"
+                        data-toggle="modal"
+                        data-target="#myModal">U
+                      </a>
+                    </td>
+                  </tr>
+                <?php endforeach ?>
+              <?php endif ?>
+            </tbody>
+          </table>
         </div>
-        <?php
-          $model = new Services;
-          $form = ActiveForm::begin([
-            'id' => 'service-update',
-            'layout' => 'horizontal',
-        ]); ?>
-        <div class="modal-body">
 
-            <?= $form->field($model, 'secretKey')->passwordInput(['autofocus' => true])->label('Secret Key') ?>
-            <?= $form->field($model, 'site')->textInput() ?>
-            <?= $form->field($model, 'login')->textInput() ?>
-            <?= $form->field($model, 'pass')->passwordInput() ?>
-            <?= $form->field($model, 'field_login')->textInput() ?>
-            <?= $form->field($model, 'field_pass')->textInput() ?>
-            <?= $form->field($model, 'attribute')->radioList([0 => 'name', 1 => 'id']) ?>
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <?= Html::submitButton('Update', ['class' => 'btn btn-primary', 'name' => 'add-button']) ?>
-        </div>
-        <?php ActiveForm::end(); ?>
       </div>
     </div>
   </div>
 
 <?php endif ?>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Modal</h4>
+      </div>
+      <?php
+        $model = new Services;
+        $form = ActiveForm::begin([
+          'id' => 'service-update',
+          'layout' => 'horizontal',
+      ]); ?>
+      <div class="modal-body">
+
+          <?=  $form->field($model, 'secretKey')->passwordInput(['autofocus' => true])->label('Secret Key') ?>
+          <?= $form->field($model, 'site')->textInput() ?>
+          <?= $form->field($model, 'login')->textInput() ?>
+          <?= $form->field($model, 'pass')->passwordInput() ?>
+          <?= $form->field($model, 'field_login')->textInput() ?>
+          <?= $form->field($model, 'field_pass')->textInput() ?>
+          <?= $form->field($model, 'attribute')->radioList([0 => 'name', 1 => 'id']) ?>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <?= Html::submitButton('Update', ['class' => 'btn btn-primary', 'name' => 'add-button']) ?>
+      </div>
+      <?php ActiveForm::end(); ?>
+    </div>
+  </div>
+</div>

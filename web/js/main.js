@@ -1,6 +1,6 @@
 $(document).ready(function(){
 
-  let notificationId;
+  let notificationRemoveRecord;
   $('.btn.btn-danger').on('click', function(){
     let answer=confirm('Do you really want to delete the entry?','');
     if(answer) {
@@ -13,11 +13,11 @@ $(document).ready(function(){
           if(+res) {
             $('[data-id="'+id+'"]').closest('tr').remove();
             if ($(".alert-success.alert").length){
-              clearTimeout(notificationId);
-              notificationId = setTimeout(function(){removeAlert('.alert-success.alert')}, 5000);
+              clearTimeout(notificationRemoveRecord);
+              notificationRemoveRecord = setTimeout(function(){removeAlert('.alert-success.alert')}, 5000);
             } else {
               $( ".container-main" ).prepend( '<div class="alert-success alert fade in"><button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>Record deleted!</div>' );
-              notificationId = setTimeout(function(){removeAlert('.alert-success.alert')}, 5000);
+              notificationRemoveRecord = setTimeout(function(){removeAlert('.alert-success.alert')}, 5000);
             }
           } else {
             console.log('bad request - ' + window.location.pathname + 'site/remove?id=' + id)

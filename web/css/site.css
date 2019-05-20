@@ -11,7 +11,7 @@ body {
 }
 
 .wrap > .container {
-    padding: 70px 15px 20px;
+    padding: 120px 15px 20px;
 }
 
 .footer {
@@ -112,4 +112,117 @@ a.desc:after {
 
 .nav > li > form > button.logout:focus {
     outline: none;
+}
+.table td, .table th {
+    vertical-align: middle !important;
+}
+td img {
+    width: 22px;
+    margin-right: 10px;
+}
+#service-form .radio,
+#service-update .radio {
+    display: inline-block ;
+}
+.radio:not(:first-child) {
+    margin-left: 10px;
+}
+#thead th:last-child {
+    text-align: center;
+    white-space: nowrap;
+}
+#tbody td:first-child {
+    display: table-cell;
+}
+#tbody tr:first-child td:last-child {
+    margin-top: -1px;
+}
+.empty-list {
+    font-size: 18px;
+    padding-top: 15px;
+    text-align: center;
+    max-width: 571px;
+    margin: 0 auto;
+}
+#secret-form {
+    margin-bottom: 20px;
+}
+.column-1 {
+    width: 40px
+}
+.column-2 {
+    width: 150px;
+}
+.column-3 {
+    width: 200px;
+}
+.column-4 {
+    width: 1px;
+}
+.table {
+    width: unset;
+    max-width: unset;
+    margin: 0 auto;
+}
+
+#tbody td:last-child a {
+    margin: 0 8px;
+}
+#tbody td:last-child {
+    white-space: nowrap;
+}
+.toolbar {
+    position: fixed;
+    top: 51px;
+    left: 0;
+    right: 0;
+    background: #34495e;
+    text-align: right;
+}
+
+.toolbar a {
+    color: #f9f9f9;
+    font-size: 14px;
+    padding: 2px 10px;
+    display: inline-block;
+    border: 1px solid #e1e8ef;
+    margin: 10px 0 10px 15px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.toolbar a:hover, .toolbar a:active {
+    background: #2c3e50;
+}
+.info {
+    background: #d9edf7 !important;
+}
+.success {
+    background: #dff0d8 !important;
+}
+.pt-70 {
+    padding-top: 70px !important;
+}
+.modal-body p.help-block.help-block-error {
+    display: none;
+}
+.modal-body .has-error .col-sm-6 {
+    position: relative;
+}
+.modal-body .has-error .col-sm-6:before {
+    position: absolute;
+    right: 25px;
+    top: 0;
+    content: '!';
+    font-weight: 900;
+    color: #a94442;
+    font-size: 24px;
+    line-height: 30px;
+}
+#create-new-record {
+    background: #27ae60;
+    border-color: #2ecc71;
+    color: #f9f9f9;
+}
+#create-new-record:hover, #create-new-record:active {
+    background: #19a353;
 }

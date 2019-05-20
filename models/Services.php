@@ -38,10 +38,55 @@ class Services extends \yii\db\ActiveRecord
 
     public static function getServices($user_id)
     {
-        return static::find()->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])->all();
+        if(Yii::$app->params['REST_API_MOD']){
+
+            $data = static::find()
+                            ->asArray()
+                            ->select(['id','site', 'login', 'pass', 'field_login', 'field_pass', 'attribute', 'date_create'])
+                            ->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])
+                            ->all();
+
+            return $data;
+        } else {
+            return static::find()->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])->all();
+        }
     }
     public static function getServicesOne($user_id)
     {
         return static::find()->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])->one();
+    }
+
+    public static function hideLogin($login)
+    {
+        if($login) {
+            $login_start = strstr($login, '@', true) ? strstr($login, '@', true) : $login;
+            $login_end = strstr($login, '@');
+            $login = substr_replace($login_start, '*****', 3, -2) . $login_end;
+            return $login;
+        }
+    }
+
+    public static function decryptWord($word, $secret_key)
+    {
+        return Yii::$app->getSecurity()->decryptByPassword(base64_decode($word), $secret_key);
+    }
+
+
+
+    public static function encryptWord($word, $add = null)
+    {
+        $encrypt_word = str_split($word);
+        $changeCharASCII = function(&$item, $key, $add) {
+            $item = ord($item);
+            $item += $add;
+        };
+        array_walk($encrypt_word, $changeCharASCII, $add);
+
+        return $encrypt_word;
+    }
+
+    public static function encryptBase64($word, $secret_key)
+    {
+        return base64_encode(Yii::$app->getSecurity()->encryptByPassword($word, $secret_key));
     }
 }

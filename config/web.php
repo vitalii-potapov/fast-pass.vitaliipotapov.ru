@@ -5,6 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
+    'name' => 'Fast Password App',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log', 'headers'],
     'aliases' => [
@@ -13,8 +14,8 @@ $config = [
     ],
     'components' => [
         'request' => [
-            // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => 'AxL_VI2svvBWmO9bG_27tvUoX_d-0ss_',
+            'cookieValidationKey' => 'AxL_VI2svvasd1123BWmO9bG_27tvUoX_d-0ss_',
+            'baseUrl'=> '',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
