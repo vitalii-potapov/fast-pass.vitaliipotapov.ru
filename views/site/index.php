@@ -22,8 +22,8 @@ $this->title = Yii::$app->name;
     </form>
   </div>
 
-  <div class="table-responsive">
-    <table class="table table-striped">
+  <div class="table-responsive width-sm-100">
+    <table class="table table-striped width-sm-100">
       <thead id="thead">
         <tr>
           <th class="column-1" scope="col">#</th>

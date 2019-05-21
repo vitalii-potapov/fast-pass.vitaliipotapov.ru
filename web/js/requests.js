@@ -21,7 +21,7 @@ $(document).ready(function(){
             flogin = obj.field_login,
             fpass = obj.field_pass;
 
-        $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt="">' + getHostname(site) + '</td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+        $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
         i++;
       }
     };
@@ -71,7 +71,7 @@ $(document).ready(function(){
                 flogin = val['field_login'],
                 fpass = val['field_pass'];
 
-            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt="">' + getHostname(site) + '</td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
             sessionStorage.setItem('site-' + id, '{"id":"' + id + '","site":"' + site + '","hideLogin":"' + hideLogin + '","login":"' + login + '","encrypt_login":"' + encrypt_login + '","pass":"' + pass + '","attribute":"' + attr + '","field_login":"' + flogin + '","field_pass":"' + fpass + '"}');
           });
         },
@@ -136,7 +136,7 @@ $(document).ready(function(){
                 $('#site-' + id).addClass('info');
                 notificationUpdateRecord = setTimeout(function(){removeAlert(); $('#site-' + id).removeClass('info');}, 5000);
               }
-              $('#site-' + id).children('td:nth-child(2)').html('<img src="/web/image/icons/' + getHostname(site) + '.png" alt="">' + getHostname(site));
+              $('#site-' + id).children('td:nth-child(2)').html('<img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a>');
               $('#site-' + id).children('td:nth-child(3)').text(hideLogin);
               $('#site-' + id).children('td:nth-child(4)').html('<td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td>');
               sessionStorage['site-' + id] = res;
@@ -191,6 +191,20 @@ $(document).ready(function(){
         return false;
       };
     });
+
+    // mobile script start
+    let lastActiveId;
+    $('#tbody tr').on('click', function() {
+      let currentActiveId = $(this).attr('id');
+      $('#tbody tr').removeClass('active');
+      if (lastActiveId !== currentActiveId) {
+        $(this).addClass('active');
+        lastActiveId = currentActiveId;
+      } else {
+        lastActiveId = 0;
+      };
+    });
+    // mobile script end
   }
 
   let createNewRecord = 1;
@@ -221,7 +235,7 @@ $(document).ready(function(){
                 row = + $('#tbody tr:last-child td:first-child').text() + 1;
                 row = row > 0 ? row : 1;
 
-            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt="">' + getHostname(site) + '</td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
             if ($('.alert').length) {
               clearTimeout(notificationCreateRecord);
               notificationCreateRecord = setTimeout(function(){removeAlert(); $('#site-' + id).removeClass('success');}, 5000);
@@ -278,4 +292,9 @@ $(document).ready(function(){
   function removeAlert() {
     $('.alert').remove();
   }
+
+  $('.toolbar .fas').on('click', function() {
+    $(this).parent().toggleClass('active');
+  })
+
 });

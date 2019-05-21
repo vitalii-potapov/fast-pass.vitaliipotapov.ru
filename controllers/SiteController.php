@@ -88,12 +88,6 @@ class SiteController extends Controller
      */
     public function actionIndexJson($key)
     {
-
-        $changeCharASCII = function(&$item, $key, $add = null) {
-            $item = ord($item);
-            $item += $add;
-        };
-
         $encrypt_data = Services::getServices(Yii::$app->user->identity->id);
         $decrypt_data = [];
         foreach ($encrypt_data as $v => $val) {
