@@ -2,26 +2,28 @@ $(document).ready(function(){
 
   let secretForm = $('#secret-form').clone();
   let emptyList = $('.empty-list').clone();
+  let countRecords = $('#count-records');
 
   if (checkSessionStorage()) {
     $('#secret-form').remove();
     $('.empty-list').remove();
     let i = 1;
     for (key in sessionStorage) {
-      if (typeof sessionStorage[key] === 'string' && sessionStorage[key].includes('encrypt_login')) {
+      if (typeof sessionStorage[key] === 'string' && sessionStorage[key].includes('site')) {
         let obj = JSON.parse(sessionStorage[key]);
         let row = i,
             id = obj.id,
             site = obj.site,
             hideLogin = obj.hideLogin,
             login = obj.login,
-            encrypt_login = obj.encrypt_login,
-            pass = obj.pass,
+            pass = typeof obj.pass === 'string' ? JSON.parse(obj.pass) : obj.pass,
+            length = pass[1],
+            pkey = obj.public_key,
             attr = obj.attribute,
             flogin = obj.field_login,
             fpass = obj.field_pass;
 
-        $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+        $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + login + '&pass=' + pass[0] + '&pkey=' + pkey + '&l=' + length + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
         i++;
       }
     };
@@ -43,9 +45,39 @@ $(document).ready(function(){
         type: 'GET',
         dataType: 'json',
         success: function(res){
-          if(res.length) {
+          if(Array.isArray(res) && res.length) {
             $('#secret-form').remove();
             $('.empty-list').remove();
+
+            $.each(res, function(i, val){
+              if(!val.hasOwnProperty('id')) return true;
+              let row = i + 1,
+                  id = val['id'],
+                  site = val['site'],
+                  hideLogin = val['hideLogin'],
+                  login = val['login'],
+                  pass = JSON.parse(val['pass']),
+                  length = pass[1],
+                  pkey = val['public_key'],
+                  attr = val['attribute'],
+                  flogin = val['field_login'],
+                  fpass = val['field_pass'];
+              let obj = {
+                  id: val['id'],
+                  site: val['site'],
+                  hideLogin: val['hideLogin'],
+                  login: val['login'],
+                  pass: JSON.parse(val['pass']),
+                  length: pass[1],
+                  public_key: val['public_key'],
+                  attribute: val['attribute'],
+                  field_login: val['field_login'],
+                  field_pass: val['field_pass'],
+              }
+              $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + login + '&pass=' + pass[0] + '&pkey=' + pkey + '&l=' + length + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+              sessionStorage.setItem('site-' + id, JSON.stringify(obj));
+            });
+
             removeAlert();
             createAlert(1, 'Success secret key!');
             notificationSuccessSecretKey = setTimeout(function(){removeAlert()}, 5000);
@@ -56,24 +88,8 @@ $(document).ready(function(){
             } else {
               createAlert(0, 'Wrong secret key or You have not added any records yet.');
               notificationWrongSecretKey = setTimeout(function(){removeAlert()}, 5000);
-            }
+            };
           };
-          $.each(res, function(i, val){
-            if(!val.hasOwnProperty('id')) return true;
-            let row = i + 1,
-                id = val['id'],
-                site = val['site'],
-                hideLogin = val['hideLogin'],
-                login = val['login'],
-                encrypt_login = val['encrypt_login'],
-                pass = val['pass'],
-                attr = val['attribute'],
-                flogin = val['field_login'],
-                fpass = val['field_pass'];
-
-            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
-            sessionStorage.setItem('site-' + id, '{"id":"' + id + '","site":"' + site + '","hideLogin":"' + hideLogin + '","login":"' + login + '","encrypt_login":"' + encrypt_login + '","pass":"' + pass + '","attribute":"' + attr + '","field_login":"' + flogin + '","field_pass":"' + fpass + '"}');
-          });
         },
         complete: function(){
           query = 1;
@@ -82,7 +98,7 @@ $(document).ready(function(){
           callUpdateRemoveBtn();
         },
         error: function(){
-          console.log('Error!', window.location.pathname + 'site/index-json?key=' + $('#secret-key').val());
+          console.log('Server error!');
         }
       });
       return false;
@@ -122,11 +138,17 @@ $(document).ready(function(){
                   site = obj.site,
                   hideLogin = obj.hideLogin,
                   login = obj.login,
-                  encrypt_login = obj.encrypt_login,
                   pass = obj.pass,
+                  length = pass[1],
+                  pkey = obj.public_key,
                   attr = obj.attribute,
                   flogin = obj.field_login,
                   fpass = obj.field_pass;
+
+              $('#site-' + id).children('td:nth-child(2)').html('<img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a>');
+              $('#site-' + id).children('td:nth-child(3)').text(hideLogin);
+              $('#site-' + id).children('td:nth-child(4)').html('<a class="btn btn-success" href="' + site + '?name=' + login + '&pass=' + pass[0] + '&pkey=' + pkey + '&l=' + length + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a>');
+              sessionStorage['site-' + id] = res;
 
               if ($('.alert').length) {
                 clearTimeout(notificationUpdateRecord);
@@ -136,10 +158,6 @@ $(document).ready(function(){
                 $('#site-' + id).addClass('info');
                 notificationUpdateRecord = setTimeout(function(){removeAlert(); $('#site-' + id).removeClass('info');}, 5000);
               }
-              $('#site-' + id).children('td:nth-child(2)').html('<img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a>');
-              $('#site-' + id).children('td:nth-child(3)').text(hideLogin);
-              $('#site-' + id).children('td:nth-child(4)').html('<td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td>');
-              sessionStorage['site-' + id] = res;
               $('#myModal').modal('hide');
               clearUpdateRemoveBtn();
               callUpdateRemoveBtn();
@@ -173,16 +191,15 @@ $(document).ready(function(){
                 secretForm.css('display', 'block').prependTo(".container-main");
                 emptyList.css('display', 'block').appendTo(".table-responsive");
               }
-              if ($(".alert-success.alert").length){
+              if ($(".alert-danger.alert").length){
                 clearTimeout(notificationRemoveRecord);
                 notificationRemoveRecord = setTimeout(function(){removeAlert()}, 5000);
               } else {
                 createAlert(0, 'Record deleted!');
                 notificationRemoveRecord = setTimeout(function(){removeAlert()}, 5000);
               }
-            } else {
-              console.log('bad request - ' + window.location.pathname + 'site/remove?id=' + id)
             }
+            countRecords.text(+ $('#count-records').text() - 1);
           },
           error: function(){
             console.log('Error!');
@@ -227,15 +244,17 @@ $(document).ready(function(){
                 site = obj.site,
                 hideLogin = obj.hideLogin,
                 login = obj.login,
-                encrypt_login = obj.encrypt_login,
                 pass = obj.pass,
+                length = pass[1],
                 attr = obj.attribute,
                 flogin = obj.field_login,
                 fpass = obj.field_pass,
+                pkey = obj.public_key,
                 row = + $('#tbody tr:last-child td:first-child').text() + 1;
-                row = row > 0 ? row : 1;
 
-            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + encrypt_login + '&pass=' + pass + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
+            row = row > 0 ? row : 1;
+
+            $('#tbody').append('<tr id="site-' + id + '"><td scope="row">' + row + '</td><td><img src="/web/image/icons/' + getHostname(site) + '.png" alt=""><a target="_blank" href="https://' + getHostname(site) + '">' + getHostname(site) + '</a></td><td>' + hideLogin + '</td><td><a class="btn btn-success" href="' + site + '?name=' + login + '&pass=' + pass[0] + '&pkey=' + pkey + '&l=' + length + '&attr=' + attr + ',' + flogin + ',' + fpass + '" target="_blank">L</a><a data-id="' + id + '" class="btn btn-danger">R</a><a data-id="' + id + '" data-site="' + site + '" data-login="' + login + '" data-flogin="' + flogin + '" data-fpass="' + fpass + '" data-attr="' + attr + '" class="btn btn-primary btn-update" data-toggle="modal" data-target="#myModal">U</a></td></tr>');
             if ($('.alert').length) {
               clearTimeout(notificationCreateRecord);
               notificationCreateRecord = setTimeout(function(){removeAlert(); $('#site-' + id).removeClass('success');}, 5000);
@@ -250,6 +269,7 @@ $(document).ready(function(){
             callUpdateRemoveBtn();
             $('#secret-form').remove();
             $('.empty-list').remove();
+            countRecords.text(+ $('#count-records').text() + 1);
           },
           complete: function() {
             createNewRecord = 1;

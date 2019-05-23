@@ -10,6 +10,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\Services;
+use app\components\AesCrypt;
 
 class SiteController extends Controller
 {
@@ -65,9 +66,7 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if(Yii::$app->params['REST_API_MOD']){
-
-        } else {
+        if(!Yii::$app->params['REST_API_MOD']){
             if($_POST) {
                 $userKey = $_POST['secretKey'];
                 $data = Services::getServices(Yii::$app->user->identity->id);
@@ -78,7 +77,11 @@ class SiteController extends Controller
                 ]);
             }
         }
-        return $this->render('index');
+        $count_records = Services::find()->where(['user_id' => Yii::$app->user->identity->id])->count();
+
+        return $this->render('index', [
+            'count_records' => $count_records,
+        ]);
     }
 
     /**
@@ -91,31 +94,23 @@ class SiteController extends Controller
         $encrypt_data = Services::getServices(Yii::$app->user->identity->id);
         $decrypt_data = [];
         foreach ($encrypt_data as $v => $val) {
-            $secret_key = 'A' . $key . strtotime(date($val['date_create']));
+            $secret_key = 'A' . $key . strtotime(date($val['date_update']));
+
             $site = Services::decryptWord($val['site'], $secret_key);
             if(!$site) break;
             $login = Services::decryptWord($val['login'], $secret_key);
             $pass = Services::decryptWord($val['pass'], $secret_key);
-
-            $encrypt_secret_key = Services::encryptWord($key);
-            $encrypt_secret_key = array_sum($encrypt_secret_key);
-
-            $encrypt_login = Services::encryptWord($login, $encrypt_secret_key);
-            $encrypt_login = implode(',', $encrypt_login);
-
-            $encrypt_pass = Services::encryptWord($pass, $encrypt_secret_key);
-            $encrypt_pass = implode(',', $encrypt_pass);
 
             $decrypt_data[] = [
                 'id' => $val['id'],
                 'site' => $site,
                 'hideLogin' => Services::hideLogin($login),
                 'login' => $login,
-                'encrypt_login' => $encrypt_login,
-                'pass' => $encrypt_pass,
+                'pass' => $pass,
                 'attribute' => $val['attribute'],
                 'field_login' => $val['field_login'],
                 'field_pass' => $val['field_pass'],
+                'public_key' => $val['public_key'],
             ];
         }
         return json_encode($decrypt_data);
@@ -171,25 +166,24 @@ class SiteController extends Controller
                 $model->field_login = Html::encode($model->field_login);
                 $model->field_pass = Html::encode($model->field_pass);
 
-                $secretKey = $model->secretKey;
-                $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime(date('Y-m-d H:i:s'));
-                $model->user_id = Yii::$app->user->identity->id;
                 $model->date_create = date('Y-m-d H:i:s');
+                $model->date_update = $model->date_create;
+
+                $secretKey = $model->secretKey;
+                $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime($model->date_update);
+                $model->user_id = Yii::$app->user->identity->id;
 
                 $site = $model->site;
                 $model->site = Services::encryptBase64($model->site, $model->secretKey);
+
                 $login = $model->login;
                 $model->login = Services::encryptBase64($model->login, $model->secretKey);
-                $pass = $model->pass;
-                $model->pass = Services::encryptBase64($model->pass, $model->secretKey);
 
-                $encrypt_secret_key = Services::encryptWord($secretKey);
-                $encrypt_secret_key = array_sum($encrypt_secret_key);
+                $model->public_key = AesCrypt::getPublicKey(32);
+                $private_key = substr($secretKey . $model->public_key, 0, 32);
 
-                $encrypt_login = Services::encryptWord($login, $encrypt_secret_key);
-                $encrypt_login = implode(',', $encrypt_login);
-                $encrypt_pass = Services::encryptWord($pass, $encrypt_secret_key);
-                $encrypt_pass = implode(',', $encrypt_pass);
+                $pass = AesCrypt::AES_Encrypt($model->pass, $private_key);
+                $model->pass = Services::encryptBase64(json_encode($pass), $model->secretKey);
 
                 if ($model->save()) {
                     $data = [
@@ -197,18 +191,16 @@ class SiteController extends Controller
                         'site' => $site,
                         'hideLogin' => Services::hideLogin($login),
                         'login' => $login,
-                        'encrypt_login' => $encrypt_login,
-                        'pass' => $encrypt_pass,
+                        'pass' => $pass,
                         'attribute' => $model->attribute,
                         'field_login' => $model->field_login,
                         'field_pass' => $model->field_pass,
+                        'public_key' => $model->public_key,
                     ];
                     return json_encode($data);
                 } else {
                     return '0';
                 }
-
-                return 'test';
             }
         } else {
             $model = new Services();
@@ -220,7 +212,7 @@ class SiteController extends Controller
                 $model->attribute = Html::encode($model->attribute);
                 $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime(date('Y-m-d H:i:s'));
                 $model->user_id = Yii::$app->user->identity->id;
-                $model->date_create = date('Y-m-d H:i:s');
+                $model->date_update = date('Y-m-d H:i:s');
                 $model->site = base64_encode(Yii::$app->getSecurity()->encryptByPassword($model->site, $model->secretKey));
                 $model->login = base64_encode(Yii::$app->getSecurity()->encryptByPassword($model->login, $model->secretKey));
                 $model->pass = base64_encode(Yii::$app->getSecurity()->encryptByPassword($model->pass, $model->secretKey));
@@ -235,24 +227,6 @@ class SiteController extends Controller
         }
 
         return $this->goHome();
-    }
-
-    /**
-     * Remove action.
-     *
-     * @return Response
-     */
-    public function actionRemove($id)
-    {
-        if(\Yii::$app->request->isAjax){
-            $model = new Services();
-            $model = $model->findOne(['id' => $id, 'user_id' => Yii::$app->user->identity->id]);
-            if ($model !== NULL && $model->delete()) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
     }
 
     /**
@@ -273,36 +247,33 @@ class SiteController extends Controller
                 $model->field_login = Html::encode($model->field_login);
                 $model->field_pass = Html::encode($model->field_pass);
 
+                $model->date_update = date('Y-m-d H:i:s');
+
                 $secretKey = $model->secretKey;
-                $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime(date('Y-m-d H:i:s'));
+                $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime($model->date_update);
                 $model->user_id = Yii::$app->user->identity->id;
-                $model->date_create = date('Y-m-d H:i:s');
 
                 $site = $model->site;
                 $model->site = Services::encryptBase64($model->site, $model->secretKey);
                 $login = $model->login;
                 $model->login = Services::encryptBase64($model->login, $model->secretKey);
-                $pass = $model->pass;
-                $model->pass = Services::encryptBase64($model->pass, $model->secretKey);
 
-                $encrypt_secret_key = Services::encryptWord($secretKey);
-                $encrypt_secret_key = array_sum($encrypt_secret_key);
+                $model->public_key = AesCrypt::getPublicKey(32);
+                $private_key = substr($secretKey . $model->public_key, 0, 32);
 
-                $encrypt_login = Services::encryptWord($login, $encrypt_secret_key);
-                $encrypt_login = implode(',', $encrypt_login);
-                $encrypt_pass = Services::encryptWord($pass, $encrypt_secret_key);
-                $encrypt_pass = implode(',', $encrypt_pass);
+                $pass = AesCrypt::AES_Encrypt($model->pass, $private_key);
+                $model->pass = Services::encryptBase64(json_encode($pass), $model->secretKey);
 
                 $data = [
                     'id' => $model->id,
                     'site' => $site,
                     'hideLogin' => Services::hideLogin($login),
                     'login' => $login,
-                    'encrypt_login' => $encrypt_login,
-                    'pass' => $encrypt_pass,
+                    'pass' => $pass,
                     'attribute' => $model->attribute,
                     'field_login' => $model->field_login,
                     'field_pass' => $model->field_pass,
+                    'public_key' => $model->public_key,
                 ];
                 if ($model->update()) {
                     return json_encode($data);
@@ -321,7 +292,7 @@ class SiteController extends Controller
 
             $model->secretKey = 'A' . Html::encode($model->secretKey) . strtotime(date('Y-m-d H:i:s'));
             $model->user_id = Yii::$app->user->identity->id;
-            $model->date_create = date('Y-m-d H:i:s');
+            $model->date_update = date('Y-m-d H:i:s');
 
             $model->site = base64_encode(Yii::$app->getSecurity()->encryptByPassword($model->site, $model->secretKey));
             $model->login = base64_encode(Yii::$app->getSecurity()->encryptByPassword($model->login, $model->secretKey));
@@ -329,6 +300,24 @@ class SiteController extends Controller
 
             if ($model->update()) {
                 return $this->goHome();
+            }
+        }
+    }
+
+    /**
+     * Remove action.
+     *
+     * @return Response
+     */
+    public function actionRemove($id)
+    {
+        if(\Yii::$app->request->isAjax){
+            $model = new Services();
+            $model = $model->findOne(['id' => $id, 'user_id' => Yii::$app->user->identity->id]);
+            if ($model !== NULL && $model->delete()) {
+                return 1;
+            } else {
+                return 0;
             }
         }
     }

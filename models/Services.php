@@ -26,13 +26,15 @@ class Services extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['user_id', 'site', 'login', 'pass', 'field_login', 'field_pass', 'attribute', 'date_create', 'secretKey'], 'required'],
+            [['user_id', 'site', 'login', 'pass', 'field_login', 'field_pass', 'attribute', 'date_create', 'date_update', 'secretKey'], 'required'],
             [['id', 'user_id', 'attribute', 'status'], 'integer'],
-            [['date_create'], 'date', 'format' => 'php:Y-m-d H:i:s'],
+            [['date_create', 'date_update'], 'date', 'format' => 'php:Y-m-d H:i:s'],
             [['site', 'login', 'pass', 'field_login', 'field_pass', 'secretKey'], 'string'],
             [['attribute'], 'default', 'value' => '0'],
             [['status'], 'default', 'value' => '1'],
-            [['site', 'login', 'pass', 'field_login', 'field_pass'], 'string', 'max' => 255],
+            [['site', 'login', 'field_login', 'field_pass'], 'string', 'max' => 255],
+            [['public_key'], 'string', 'max' => 32],
+            [['pass'], 'string', 'max' => 500],
         ];
     }
 
@@ -42,7 +44,7 @@ class Services extends \yii\db\ActiveRecord
 
             $data = static::find()
                             ->asArray()
-                            ->select(['id','site', 'login', 'pass', 'field_login', 'field_pass', 'attribute', 'date_create'])
+                            ->select(['id','site', 'login', 'pass', 'public_key', 'field_login', 'field_pass', 'attribute', 'date_update'])
                             ->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])
                             ->all();
 
@@ -50,10 +52,6 @@ class Services extends \yii\db\ActiveRecord
         } else {
             return static::find()->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])->all();
         }
-    }
-    public static function getServicesOne($user_id)
-    {
-        return static::find()->where(['user_id' => $user_id, 'status' => self::STATUS_ACTIVE])->one();
     }
 
     public static function hideLogin($login)
@@ -66,13 +64,6 @@ class Services extends \yii\db\ActiveRecord
         }
     }
 
-    public static function decryptWord($word, $secret_key)
-    {
-        return Yii::$app->getSecurity()->decryptByPassword(base64_decode($word), $secret_key);
-    }
-
-
-
     public static function encryptWord($word, $add = null)
     {
         $encrypt_word = str_split($word);
@@ -83,6 +74,11 @@ class Services extends \yii\db\ActiveRecord
         array_walk($encrypt_word, $changeCharASCII, $add);
 
         return $encrypt_word;
+    }
+
+    public static function decryptWord($word, $secret_key)
+    {
+        return Yii::$app->getSecurity()->decryptByPassword(base64_decode($word), $secret_key);
     }
 
     public static function encryptBase64($word, $secret_key)
