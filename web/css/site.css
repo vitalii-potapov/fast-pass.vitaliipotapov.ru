@@ -259,6 +259,17 @@ td img {
   background: #19a353;
 }
 
+#add-google-auth {
+  background: hsl(283, 39%, 53%);
+  border-color: hsl(283, 39%, 60%);
+  color: #f9f9f9;
+}
+
+#add-google-auth:hover,
+#add-google-auth:active {
+  background: hsl(283, 49%, 48%);
+}
+
 .copyrigth a {
   text-decoration: none;
 }
@@ -268,9 +279,42 @@ td img {
   color: #333333 !important;
 }
 
+#google-auth-modal .modal-dialog {
+  max-width: 400px;
+}
+
+#google-auth-modal strong {
+  font-size: 25px;
+  line-height: 2;
+}
+
+.mx-0 {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
+
+.toolbar-modal {
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  transition: all ease-in-out 0.3s;
+}
+
+.toolbar-modal.active {
+  position: absolute;
+  background: #00000080;
+}
+
 @media (min-width: 992px) {
   .toolbar .fas {
     display: none;
+  }
+  .container-main {
+    padding-top: 30px;
+  }
+  .site-login {
+    padding-top: 40px;
   }
 }
 
@@ -337,9 +381,10 @@ td img {
     width: max-content;
     position: absolute;
     top: 0;
-    right: 0;
+    right: -1px;
     padding: 10px;
     transition: all ease-in-out 0.3s;
+    transition-delay: 0.1s;
     z-index: 9;
     transform: translateX(100%);
   }

@@ -15,7 +15,16 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         return 'user';
     }
-
+    /**
+     * @return array the validation rules.
+     */
+    public function rules()
+    {
+        return [
+            [['authKey'], 'string'],
+            [['password'], 'required'],
+        ];
+    }
     /**
      * {@inheritdoc}
      */
@@ -26,7 +35,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     /**
      * {@inheritdoc}
      */
-    public static function findIdentityByAccessToken($token, $type = null)
+    public static function findIdentityByAccessToken($token, $type = NULL)
     {
         throw new NotSupportedException('"findIdentityByAccessToken" is not implemented.');
     }
@@ -34,7 +43,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      * Finds user by username
      *
      * @param string $username
-     * @return static|null
+     * @return static|NULL
      */
     public static function findByUsername($username)
     {

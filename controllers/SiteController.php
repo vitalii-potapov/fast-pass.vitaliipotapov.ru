@@ -10,6 +10,7 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use app\models\LoginForm;
 use app\models\Services;
+use app\models\User;
 use app\components\AesCrypt;
 
 class SiteController extends Controller
@@ -28,7 +29,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index', 'services', 'remove', 'update', 'index-json'],
+                        'actions' => ['logout', 'index', 'services', 'remove', 'update', 'index-json', 'google-authorization'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -54,7 +55,7 @@ class SiteController extends Controller
             ],
             'captcha' => [
                 'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
+                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : NULL,
             ],
         ];
     }
@@ -66,22 +67,22 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        if(!Yii::$app->params['REST_API_MOD']){
-            if($_POST) {
-                $userKey = $_POST['secretKey'];
-                $data = Services::getServices(Yii::$app->user->identity->id);
+        if(Yii::$app->params['REST_API_MOD']){
+            $count_records = Services::find()->where(['user_id' => Yii::$app->user->identity->id])->count();
 
-                return $this->render('index', [
-                    'data' => $data,
-                    'userKey' => $userKey,
-                ]);
-            }
+            return $this->render('index', [
+                'count_records' => $count_records,
+            ]);
+        } else {
+                if($_POST) {
+                    $data = Services::getServices(Yii::$app->user->identity->id);
+
+                    return $this->render('index', [
+                        'data' => $data,
+                    ]);
+                }
         }
-        $count_records = Services::find()->where(['user_id' => Yii::$app->user->identity->id])->count();
 
-        return $this->render('index', [
-            'count_records' => $count_records,
-        ]);
     }
 
     /**
@@ -89,31 +90,54 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionIndexJson($key)
+    public function actionIndexJson()
     {
-        $encrypt_data = Services::getServices(Yii::$app->user->identity->id);
-        $decrypt_data = [];
-        foreach ($encrypt_data as $v => $val) {
-            $secret_key = 'A' . $key . strtotime(date($val['date_update']));
+        if(\Yii::$app->request->isAjax){
+            $encrypt_data = Services::getServices(Yii::$app->user->identity->id);
+            $decrypt_data = [];
+            foreach ($encrypt_data as $v => $val) {
+                $secret_key = 'A' . $_POST['secret-key'] . strtotime(date($val['date_update']));
 
-            $site = Services::decryptWord($val['site'], $secret_key);
-            if(!$site) break;
-            $login = Services::decryptWord($val['login'], $secret_key);
-            $pass = Services::decryptWord($val['pass'], $secret_key);
+                $site = Services::decryptWord($val['site'], $secret_key);
+                if(!$site) break;
+                $login = Services::decryptWord($val['login'], $secret_key);
+                $pass = Services::decryptWord($val['pass'], $secret_key);
 
-            $decrypt_data[] = [
-                'id' => $val['id'],
-                'site' => $site,
-                'hideLogin' => Services::hideLogin($login),
-                'login' => $login,
-                'pass' => $pass,
-                'attribute' => $val['attribute'],
-                'field_login' => $val['field_login'],
-                'field_pass' => $val['field_pass'],
-                'public_key' => $val['public_key'],
-            ];
+                $decrypt_data[] = [
+                    'id' => $val['id'],
+                    'site' => $site,
+                    'hideLogin' => Services::hideLogin($login),
+                    'login' => $login,
+                    'pass' => $pass,
+                    'attribute' => $val['attribute'],
+                    'field_login' => $val['field_login'],
+                    'field_pass' => $val['field_pass'],
+                    'public_key' => $val['public_key'],
+                ];
+            }
+            return json_encode($decrypt_data);
         }
-        return json_encode($decrypt_data);
+    }
+
+     /**
+     * Login action.
+     *
+     * @return Response|string
+     */
+    public function actionGoogleAuthorization() {
+        $model = new User;
+        $model = $model->findOne(Yii::$app->user->identity->id);
+
+        if (password_verify($_POST['User']['password'], $model->password)) {
+            $model->load(Yii::$app->request->post());
+            $secretKey = 'A' . Html::encode($model->password) . Html::encode($model->username);
+            $model->authKey = Services::encryptBase64($model->authKey, $secretKey);
+            $model->password = password_hash(Html::encode($model->password), PASSWORD_BCRYPT, ['cost' => 12]);
+            if ($model->update()) {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -132,6 +156,7 @@ class SiteController extends Controller
             return $this->goBack();
         }
 
+        $model->authKey = '';
         $model->password = '';
         return $this->render('login', [
             'model' => $model,

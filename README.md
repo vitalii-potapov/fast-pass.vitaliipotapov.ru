@@ -1,1 +1,1 @@
-fast-pass.vitaliipotapov.ru
+quick-login.vitaliipotapov.ru

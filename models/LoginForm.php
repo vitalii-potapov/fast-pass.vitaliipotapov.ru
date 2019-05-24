@@ -7,7 +7,7 @@ use yii\helpers\Html;
 /**
  * LoginForm is the model behind the login form.
  *
- * @property User|null $user This property is read-only.
+ * @property User|NULL $user This property is read-only.
  *
  */
 class LoginForm extends Model
@@ -60,16 +60,18 @@ class LoginForm extends Model
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
-            $secretKey = 'A' . Html::encode($this->password) . Html::encode($this->username);
-            $secretAuth = Services::decryptWord($user->authKey, $secretKey);
-            if ($secretAuth) {
-                $ga = new \PHPGangsta_GoogleAuthenticator();
-                $oneCode = $ga->getCode($secretAuth);
-                 if (!$user || $this->authKey !== $oneCode) {
+            if ($user->authKey !== NULL) {
+                $secretKey = 'A' . Html::encode($this->password) . Html::encode($this->username);
+                $secretAuth = Services::decryptWord($user->authKey, $secretKey);
+                if ($secretAuth) {
+                    $ga = new \PHPGangsta_GoogleAuthenticator();
+                    $oneCode = $ga->getCode($secretAuth);
+                    if (!$user || $this->authKey !== $oneCode) {
+                        $this->addError($attribute, 'Incorrect username or password.');
+                    }
+                } else {
                     $this->addError($attribute, 'Incorrect username or password.');
                 }
-            } else {
-                $this->addError($attribute, 'Incorrect username or password.');
             }
         }
     }
@@ -87,7 +89,7 @@ class LoginForm extends Model
     /**
      * Finds user by [[username]]
      *
-     * @return User|null
+     * @return User|NULL
      */
     public function getUser()
     {

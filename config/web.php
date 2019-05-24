@@ -5,7 +5,7 @@ $db = require __DIR__ . '/db.php';
 
 $config = [
     'id' => 'basic',
-    'name' => 'Fast Password App',
+    'name' => 'Quick Login App',
     'basePath' => dirname(__DIR__),
     'bootstrap' => ['log', 'headers'],
     'aliases' => [
@@ -64,7 +64,7 @@ $config = [
             'cspDirectives' => [
                 'script-src' => "'self' 'unsafe-inline'",
                 'style-src' => "'self' 'unsafe-inline'",
-                'img-src' => "'self' data:",
+                'img-src' => "'self' data: https://api.qrserver.com",
                 'connect-src' => "'self'",
                 'font-src' => "'self'",
                 'object-src' => "'self'",

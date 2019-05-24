@@ -95,7 +95,7 @@ class AesCrypt
     $data[1] = count($block_to_byte);
     if (count($block_to_byte) < 16) {
       for ($i = count($block_to_byte); $i < 16; $i++) {
-        $block_to_byte[] = null;
+        $block_to_byte[] = NULL;
       }
     }
     $key_to_byte = [];

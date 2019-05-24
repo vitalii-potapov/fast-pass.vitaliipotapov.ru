@@ -40,9 +40,11 @@ $(document).ready(function(){
   $('#get-sites').on('click', function(){
     if (query && !checkSessionStorage()) {
       query = 0;
+      let data = $('#secret-form form').serialize();
       $.ajax({
-        url: window.location.pathname + 'site/index-json?key=' + $('#secret-key').val(),
-        type: 'GET',
+        url: window.location.pathname + 'site/index-json',
+        type: 'POST',
+        data: data,
         dataType: 'json',
         success: function(res){
           if(Array.isArray(res) && res.length) {
@@ -179,7 +181,6 @@ $(document).ready(function(){
       let answer=confirm('Do you really want to delete the entry?','');
       if(answer) {
         let id = $(this).attr('data-id');
-
         $.ajax({
           url: window.location.pathname + 'site/remove?id=' + id,
           type: 'POST',
@@ -279,8 +280,54 @@ $(document).ready(function(){
           }
         });
       }
-    return false;
+      return false;
     });
+  });
+
+  let createNewGoogleAuth = 1;
+  let notificationGoogleAuth;
+  let notificationGoogleAuthError;
+  $('#google-auth').on('beforeSubmit', function(){
+    if (createNewGoogleAuth) {
+      createNewGoogleAuth = 0;
+      let data = $(this).serialize();
+      $.ajax({
+        url: window.location.pathname + 'site/google-authorization',
+        type: 'POST',
+        data: data,
+        success: function(res){
+          $('#google-auth-modal').modal('hide');
+          if(+res) {
+            $('body').removeClass('modal-open');
+            $('.modal-backdrop.fade.in').remove();
+            $('#google-auth-modal').remove();
+            $('#add-google-auth').remove();
+            if ($('.alert.alert-success').length) {
+              clearTimeout(notificationGoogleAuth);
+              notificationGoogleAuth = setTimeout(function(){ removeAlert(); }, 5000);
+            } else {
+              createAlert(1, 'Successfully changed google authorization!');
+              notificationGoogleAuth = setTimeout(function(){ removeAlert(); }, 5000);
+            }
+          } else {
+            if ($('.alert.alert-danger').length) {
+              clearTimeout(notificationGoogleAuthError);
+              notificationGoogleAuthError = setTimeout(function(){ removeAlert(); }, 5000);
+            } else {
+              createAlert(0, 'Error record, google authorization no changed!');
+              notificationGoogleAuthError = setTimeout(function(){ removeAlert(); }, 5000);
+            }
+          }
+        },
+        complete: function() {
+          createNewGoogleAuth = 1;
+        },
+        error: function() {
+          alert('Error!');
+        }
+      });
+    }
+    return false;
   });
 
   $('#clear-storage').on('click', function() {
@@ -314,7 +361,7 @@ $(document).ready(function(){
   }
 
   $('.toolbar .fas').on('click', function() {
+    $('.toolbar-modal').toggleClass('active');
     $(this).parent().toggleClass('active');
   })
-
 });

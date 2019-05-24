@@ -64,7 +64,7 @@ class Services extends \yii\db\ActiveRecord
         }
     }
 
-    public static function encryptWord($word, $add = null)
+    public static function encryptWord($word, $add = NULL)
     {
         $encrypt_word = str_split($word);
         $changeCharASCII = function(&$item, $key, $add) {
