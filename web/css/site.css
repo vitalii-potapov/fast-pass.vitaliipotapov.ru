@@ -155,7 +155,7 @@ td img {
 
 .empty-list {
   font-size: 18px;
-  padding-top: 15px;
+  padding: 15px;
   text-align: center;
   max-width: 571px;
   margin: 0 auto;
@@ -304,6 +304,7 @@ td img {
 .toolbar-modal.active {
   position: absolute;
   background: #00000080;
+  z-index: 1;
 }
 
 @media (min-width: 992px) {

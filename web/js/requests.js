@@ -292,7 +292,7 @@ $(document).ready(function(){
       createNewGoogleAuth = 0;
       let data = $(this).serialize();
       $.ajax({
-        url: window.location.pathname + 'site/google-authorization',
+        url: window.location.pathname + 'site/google-authenticator',
         type: 'POST',
         data: data,
         success: function(res){
@@ -306,7 +306,7 @@ $(document).ready(function(){
               clearTimeout(notificationGoogleAuth);
               notificationGoogleAuth = setTimeout(function(){ removeAlert(); }, 5000);
             } else {
-              createAlert(1, 'Successfully changed google authorization!');
+              createAlert(1, 'Successfully changed google authenticator!');
               notificationGoogleAuth = setTimeout(function(){ removeAlert(); }, 5000);
             }
           } else {
@@ -314,7 +314,7 @@ $(document).ready(function(){
               clearTimeout(notificationGoogleAuthError);
               notificationGoogleAuthError = setTimeout(function(){ removeAlert(); }, 5000);
             } else {
-              createAlert(0, 'Error record, google authorization no changed!');
+              createAlert(0, 'Error record, google authenticator no changed!');
               notificationGoogleAuthError = setTimeout(function(){ removeAlert(); }, 5000);
             }
           }

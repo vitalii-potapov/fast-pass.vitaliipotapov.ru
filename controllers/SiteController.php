@@ -29,7 +29,7 @@ class SiteController extends Controller
                         'allow' => true,
                     ],
                     [
-                        'actions' => ['logout', 'index', 'services', 'remove', 'update', 'index-json', 'google-authorization'],
+                        'actions' => ['logout', 'index', 'services', 'remove', 'update', 'index-json', 'google-authenticator'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -124,7 +124,7 @@ class SiteController extends Controller
      *
      * @return Response|string
      */
-    public function actionGoogleAuthorization() {
+    public function actionGoogleAuthenticator() {
         $model = new User;
         $model = $model->findOne(Yii::$app->user->identity->id);
 

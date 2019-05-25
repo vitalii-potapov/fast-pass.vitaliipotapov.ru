@@ -194,12 +194,12 @@ $this->title = Yii::$app->name;
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title" id="google-auth-Label">Google Authorization</h4>
+        <h4 class="modal-title" id="google-auth-Label">Google Authenticator</h4>
       </div>
       <?php
         $user = new User;
         $form = ActiveForm::begin([
-          'action' => 'site/google-authorization',
+          'action' => 'site/google-authenticator',
           'id' => 'google-auth',
           'layout' => 'horizontal',
           'fieldConfig' => [
@@ -213,7 +213,7 @@ $this->title = Yii::$app->name;
         $qrCodeUrl = $ga->getQRCodeGoogleUrl('Blog', $secret);
       ?>
         <div class="modal-body qr-code">
-          <p>1. Open the Google Authorization on your phone.</p>
+          <p>1. Open the Google Authenticator on your phone.</p>
           <p>2. Hold your device over a QR Code so that it’s clearly visible within your smartphone’s screen.</p>
           <p class="text-center"><img src="<?= $qrCodeUrl ?>" alt="<?=$secret?>" title="qrCodeUrl"></p>
           <p>3. Or You can write QR Code in your app independently.</p>
