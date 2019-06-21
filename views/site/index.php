@@ -29,7 +29,7 @@ $this->title = Yii::$app->name;
           <th class="column-1" scope="col">#</th>
           <th class="column-2" scope="col">site</th>
           <th class="column-3" scope="col">login</th>
-          <th class="column-4" scope="col"><span>L</span>ink / Remove / Update</th>
+          <th class="column-4" scope="col">Link / Copy / Remove / Update</th>
         </tr>
       </thead>
       <tbody id="tbody">
